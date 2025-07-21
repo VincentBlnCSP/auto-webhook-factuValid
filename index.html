@@ -2,116 +2,133 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Validation Facturation</title>
+  <title>Validation de l'envoi en facturation</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      padding: 30px;
-      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4fefc;
+      color: #333;
+      margin: 0;
+      padding: 0;
     }
     .container {
-      background-color: white;
-      padding: 20px;
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
       border-radius: 12px;
-      max-width: 500px;
-      margin: 0 auto;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border: 2px solid #00aa8d;
+    }
+    h1 {
+      color: #00aa8d;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .field {
+      margin-bottom: 15px;
+    }
+    .field label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
     }
     .info {
-      text-align: left;
-      margin-top: 20px;
-      font-size: 15px;
+      background: #e0f7f4;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
     }
     textarea {
       width: 100%;
-      height: 80px;
-      margin-top: 10px;
-      border-radius: 8px;
+      padding: 10px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      padding: 8px;
       resize: vertical;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 15px;
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+    .btn {
+      padding: 10px 25px;
       border: none;
       border-radius: 6px;
+      font-size: 15px;
+      font-weight: bold;
       cursor: pointer;
-      margin: 20px 10px 0 10px;
     }
-    .validate-btn {
+    .btn-valider {
       background-color: #00aa8d;
       color: white;
     }
-    .cancel-btn {
-      background-color: #ccc;
-      color: #333;
+    .btn-retour {
+      background-color: #f28b82;
+      color: black;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>🧾 Vérification avant envoi en facturation</h2>
+    <h1>🚀 Validation de l’envoi en facturation</h1>
 
     <div class="info">
-      <p><strong>Numéro de l'affaire :</strong> <span id="dealId"></span></p>
-      <p><strong>Montant LDM :</strong> <span id="montant"></span> €</p>
-      <p><strong>Total des paiements saisis :</strong> <span id="totalPaiements"></span> €</p>
-      <p><strong>Nombre d’échéances :</strong> <span id="nbEcheances"></span></p>
-      <p><strong>Date de la 1ère échéance :</strong> <span id="dateEcheance"></span></p>
+      <p><strong>Affaire :</strong> <span id="name_id"></span></p>
+      <p><strong>Montant total :</strong> <span id="montantLDM"></span> €</p>
+      <p><strong>Nombre d’échéances :</strong> <span id="NbEcheance"></span></p>
+      <p><strong>Total des paiements saisis :</strong> <span id="TotalPaiement"></span> €</p>
+      <p><strong>Date de la 1ère échéance :</strong> <span id="Date1erEcheance"></span></p>
     </div>
 
-    <label for="commentaire">💬 Commentaire à destination de la facturation :</label>
-    <textarea id="commentaire" placeholder="(facultatif)"></textarea>
+    <div class="field">
+      <label for="commentaire">💬 Commentaire à destination de la facturation :</label>
+      <textarea id="commentaire" rows="4" placeholder="Ex : la date de la 1ère échéance sera transmise après validation client..."></textarea>
+    </div>
 
-    <div>
-      <button class="validate-btn" onclick="valider()">✅ Valider</button>
-      <button class="cancel-btn" onclick="retour()">Retour</button>
+    <div class="buttons">
+      <button class="btn btn-valider" onclick="valider()">✅ Valider</button>
+      <button class="btn btn-retour" onclick="window.history.back()">↩️ Retour</button>
     </div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
+    const name_id = params.get("name_id") || "-";
+    const montantLDM = params.get("montantLDM") || "-";
+    const NbEcheance = params.get("NbEcheance") || "-";
+    const Date1erEcheance = params.get("Date1erEcheance") || "-";
+    const TotalPaiement = params.get("TotalPaiement") || "-";
 
-    const dealId = params.get("deal_id") || "?";
-    const montant = params.get("montantLDM") || "?";
-    const totalPaiements = params.get("TotalPaiement") || "?";
-    const nbEcheances = params.get("NbEchéance") || "?";
-    const dateEcheance = params.get("Date1erEcheance") || "?";
+    document.getElementById("name_id").innerText = name_id;
+    document.getElementById("montantLDM").innerText = montantLDM;
+    document.getElementById("NbEcheance").innerText = NbEcheance;
+    document.getElementById("Date1erEcheance").innerText = Date1erEcheance;
+    document.getElementById("TotalPaiement").innerText = TotalPaiement;
 
-    document.getElementById("dealId").textContent = dealId;
-    document.getElementById("montant").textContent = montant;
-    document.getElementById("totalPaiements").textContent = totalPaiements;
-    document.getElementById("nbEcheances").textContent = nbEcheances;
-    document.getElementById("dateEcheance").textContent = dateEcheance;
-
-    function valider() {
+    async function valider() {
       const commentaire = document.getElementById("commentaire").value;
+      const body = {
+        name_id,
+        montantLDM,
+        NbEcheance,
+        Date1erEcheance,
+        TotalPaiement,
+        commentaire
+      };
 
-      fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          deal_id: dealId,
-          montantLDM: montant,
-          totalPaiements: totalPaiements,
-          nbEcheances: nbEcheances,
-          date1ereEcheance: dateEcheance,
-          commentaire: commentaire
-        })
-      })
-      .then(() => {
-        alert("✅ Demande de facturation envoyée avec succès !");
-        window.close();
-      })
-      .catch(() => {
-        alert("❌ Une erreur est survenue. Merci de réessayer.");
-      });
-    }
+      try {
+        await fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
 
-    function retour() {
-      window.close();
+        alert("✅ La demande a bien été envoyée à la facturation.");
+        window.location.href = "about:blank";
+      } catch (e) {
+        alert("❌ Une erreur est survenue lors de l'envoi.");
+      }
     }
   </script>
 </body>
