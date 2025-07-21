@@ -12,33 +12,40 @@
       padding: 0;
     }
     .container {
-      max-width: 600px;
+      max-width: 650px;
       margin: 40px auto;
       background: white;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border: 2px solid #00aa8d;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      border: 3px solid #00aa8d;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 20px;
+      max-width: 220px;
     }
     h1 {
       color: #00aa8d;
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
+      font-size: 22px;
+    }
+    h2 {
+      font-size: 18px;
+      color: #00aa8d;
+      margin-top: 25px;
+      border-bottom: 1px solid #d0f5ef;
+      padding-bottom: 5px;
     }
     .field {
-      margin-bottom: 15px;
-    }
-    .field label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 5px;
-    }
-    .info {
-      background: #e6faf6;
-      padding: 10px;
-      border-radius: 6px;
       margin-bottom: 20px;
-      border: 1px solid #00aa8d;
+    }
+    .info p {
+      margin: 6px 0;
+    }
+    .info span {
+      font-weight: bold;
     }
     textarea {
       width: 100%;
@@ -46,11 +53,12 @@
       border-radius: 6px;
       border: 1px solid #ccc;
       resize: vertical;
+      font-family: inherit;
     }
     .buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 25px;
+      margin-top: 30px;
     }
     .btn {
       padding: 10px 25px;
@@ -68,27 +76,33 @@
       background-color: #f28b82;
       color: black;
     }
+    .btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🚀 Validation de l’envoi en facturation</h1>
+    <img src="https://vincentblncsp.github.io/assets/logo-csp.png" alt="Logo CSP" class="logo">
+    <h1>✅ Vérification avant envoi en facturation</h1>
 
+    <h2>Détails de l’affaire</h2>
     <div class="info">
-      <p><strong>Affaire :</strong> <span id="name_id"></span></p>
-      <p><strong>Montant total :</strong> <span id="montantLDM"></span> €</p>
-      <p><strong>Nombre d’échéances :</strong> <span id="NbEcheance"></span></p>
-      <p><strong>Total des paiements saisis :</strong> <span id="TotalPaiement"></span> €</p>
-      <p><strong>Date de la 1ère échéance :</strong> <span id="Date1erEcheance"></span></p>
+      <p>Nom de l'affaire : <span id="name_id">?</span></p>
+      <p>Montant LDM : <span id="montantLDM">-</span> €</p>
+      <p>Total des paiements saisis : <span id="TotalPaiement">-</span> €</p>
+      <p>Nombre d’échéances : <span id="NbEcheance">-</span></p>
+      <p>Date de la 1ère échéance : <span id="Date1erEcheance">-</span></p>
     </div>
 
+    <h2>💬 Commentaire à destination de la facturation</h2>
     <div class="field">
-      <label for="commentaire">💬 Commentaire à destination de la facturation :</label>
-      <textarea id="commentaire" rows="4" placeholder="Ex : la date de la 1ère échéance sera transmise après validation client..."></textarea>
+      <textarea id="commentaire" rows="4" placeholder="Ex : La date de la 1ère échéance sera transmise après validation client..."></textarea>
     </div>
 
     <div class="buttons">
-      <button class="btn btn-valider" onclick="valider()">✅ Valider</button>
+      <button class="btn btn-valider" id="btnValider" onclick="valider()" disabled>✅ Valider</button>
       <button class="btn btn-retour" onclick="window.history.back()">↩️ Retour</button>
     </div>
   </div>
@@ -107,8 +121,15 @@
     document.getElementById("Date1erEcheance").innerText = Date1erEcheance;
     document.getElementById("TotalPaiement").innerText = TotalPaiement;
 
+    const commentaireField = document.getElementById("commentaire");
+    const validerBtn = document.getElementById("btnValider");
+
+    commentaireField.addEventListener("input", function () {
+      validerBtn.disabled = commentaireField.value.trim().length === 0;
+    });
+
     async function valider() {
-      const commentaire = document.getElementById("commentaire").value;
+      const commentaire = commentaireField.value.trim();
       const body = {
         name_id,
         montantLDM,
