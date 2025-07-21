@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Validation Facturation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      padding: 30px;
+      text-align: center;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: 0 auto;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .info {
+      text-align: left;
+      margin-top: 20px;
+      font-size: 15px;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      padding: 8px;
+      resize: vertical;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 20px 10px 0 10px;
+    }
+    .validate-btn {
+      background-color: #00aa8d;
+      color: white;
+    }
+    .cancel-btn {
+      background-color: #ccc;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧾 Vérification avant envoi en facturation</h2>
+
+    <div class="info">
+      <p><strong>Numéro de l'affaire :</strong> <span id="dealId"></span></p>
+      <p><strong>Montant LDM :</strong> <span id="montant"></span> €</p>
+      <p><strong>Total des paiements saisis :</strong> <span id="totalPaiements"></span> €</p>
+      <p><strong>Nombre d’échéances :</strong> <span id="nbEcheances"></span></p>
+      <p><strong>Date de la 1ère échéance :</strong> <span id="dateEcheance"></span></p>
+    </div>
+
+    <label for="commentaire">💬 Commentaire à destination de la facturation :</label>
+    <textarea id="commentaire" placeholder="(facultatif)"></textarea>
+
+    <div>
+      <button class="validate-btn" onclick="valider()">✅ Valider</button>
+      <button class="cancel-btn" onclick="retour()">Retour</button>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const dealId = params.get("deal_id") || "?";
+    const montant = params.get("montantLDM") || "?";
+    const totalPaiements = params.get("TotalPaiement") || "?";
+    const nbEcheances = params.get("NbEchéance") || "?";
+    const dateEcheance = params.get("Date1erEcheance") || "?";
+
+    document.getElementById("dealId").textContent = dealId;
+    document.getElementById("montant").textContent = montant;
+    document.getElementById("totalPaiements").textContent = totalPaiements;
+    document.getElementById("nbEcheances").textContent = nbEcheances;
+    document.getElementById("dateEcheance").textContent = dateEcheance;
+
+    function valider() {
+      const commentaire = document.getElementById("commentaire").value;
+
+      fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          deal_id: dealId,
+          montantLDM: montant,
+          totalPaiements: totalPaiements,
+          nbEcheances: nbEcheances,
+          date1ereEcheance: dateEcheance,
+          commentaire: commentaire
+        })
+      })
+      .then(() => {
+        alert("✅ Demande de facturation envoyée avec succès !");
+        window.close();
+      })
+      .catch(() => {
+        alert("❌ Une erreur est survenue. Merci de réessayer.");
+      });
+    }
+
+    function retour() {
+      window.close();
+    }
+  </script>
+</body>
+</html>
