@@ -17,14 +17,19 @@
     </a>
 
     <div id="dealInfo" style="font-size: 12px; color: #555; margin-top: 10px;"></div>
+    <div id="echeancier" style="margin-top: 20px; font-size: 14px;"></div>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const dealId = params.get("deal_id");
     const infoZone = document.getElementById("dealInfo");
+    const echeancierZone = document.getElementById("echeancier");
 
     if (dealId) {
+      // On affiche un petit message de chargement
+      infoZone.innerHTML = "⏳ Chargement des informations...";
+
       fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,14 +39,34 @@
       .then(data => {
         const nomAffaire = data.deal_name;
         const montant = data.montantLDM;
+        const echeances = JSON.parse(data.echeances).data;
 
         // Afficher le récap
         infoZone.innerHTML = `📄 <strong>${nomAffaire}</strong><br>💶 Montant total LDM : <strong>${montant} €</strong>`;
+
+        // Construire le tableau d'échéancier
+        if (echeances.length > 0) {
+          let table = '<table style="margin: 0 auto; border-collapse: collapse; font-size: 13px;">';
+          table += '<tr><th style="border: 1px solid #ccc; padding: 5px 10px;">Date</th><th style="border: 1px solid #ccc; padding: 5px 10px;">Montant (€)</th><th style="border: 1px solid #ccc; padding: 5px 10px;">Description</th></tr>';
+
+          echeances.forEach(e => {
+            table += `<tr>
+                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.billing_date}</td>
+                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.amount}</td>
+                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.description}</td>
+                      </tr>`;
+          });
+          table += '</table>';
+          echeancierZone.innerHTML = `📆 <strong>Échéancier :</strong><br>${table}`;
+        } else {
+          echeancierZone.innerHTML = "⚠️ Aucun échéancier renseigné.";
+        }
 
         // Changer lien bouton vers la version complète
         document.getElementById("factuBtn").href = `https://vincentblncsp.github.io/auto-webhook-factuValid/?deal_id=${dealId}`;
       })
       .catch(err => {
+        console.error("Erreur :", err);
         infoZone.innerHTML = "❌ Impossible de récupérer les informations. Veuillez réessayer.";
       });
     } else {
