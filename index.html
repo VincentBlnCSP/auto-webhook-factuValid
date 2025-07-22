@@ -129,7 +129,7 @@
     const ecart = Math.abs(montantLDM - TotalPaiement);
     if (ecart > 1) {
       document.getElementById("alertEcart").style.display = "block";
-      document.getElementById("alertEcart").innerText = `⚠️ Écart détecté entre le montant de l'affaire et les paiements saisis : </p> ${ecart.toFixed(2)} €.\nMerci de vérifier avant envoi.`;
+      document.getElementById("alertEcart").innerText = `⚠️ Écart détecté entre le montant de l'affaire et les paiements saisis : \n ${ecart.toFixed(2)} €.\nMerci de vérifier avant envoi.`;
     }
 
     const commentaireField = document.getElementById("commentaire");
