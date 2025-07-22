@@ -20,6 +20,11 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       border: 2px solid #00aa8d;
     }
+    .logo {
+      display: block;
+      margin: 0 auto 10px auto;
+      height: 50px;
+    }
     h1 {
       color: #00aa8d;
       text-align: center;
@@ -73,7 +78,7 @@
       color: black;
     }
     .alert {
-      margin-top: 15px;
+      margin-top: 20px;
       background-color: #fff3cd;
       color: #856404;
       border: 1px solid #ffeeba;
@@ -84,6 +89,7 @@
 </head>
 <body>
   <div class="container">
+    <img src="https://vincentblncsp.github.io/auto-webhook-factuValid/logo.png" alt="Logo CSP" class="logo" />
     <h1>🚀 Validation de l’envoi en facturation</h1>
 
     <div class="info">
@@ -110,11 +116,11 @@
     const params = new URLSearchParams(window.location.search);
     const name_id = params.get("name_id") || "?";
     const montantLDM = parseFloat(params.get("montantLDM")) || 0;
-    const NbEcheance = params.get("NbEcheance") || "-";
+    const NbEcheance = params.get("NbEchéance") || "-";
     const Date1erEcheance = params.get("Date1erEcheance") || "-";
     const TotalPaiement = parseFloat(params.get("TotalPaiement")) || 0;
 
-    document.getElementById("name_id").innerText = name_id;
+    document.getElementById("name_id").innerText = decodeURIComponent(name_id);
     document.getElementById("montantLDM").innerText = montantLDM.toLocaleString();
     document.getElementById("NbEcheance").innerText = NbEcheance;
     document.getElementById("Date1erEcheance").innerText = Date1erEcheance;
@@ -123,7 +129,7 @@
     const ecart = Math.abs(montantLDM - TotalPaiement);
     if (ecart > 1) {
       document.getElementById("alertEcart").style.display = "block";
-      document.getElementById("alertEcart").innerText = `⚠️ Écart détecté entre le montant de l'affaire et les paiements saisis : ${ecart.toFixed(2)} €. Merci de vérifier avant envoi.`;
+      document.getElementById("alertEcart").innerText = `⚠️ Écart détecté entre le montant de l'affaire et les paiements saisis : ${ecart.toFixed(2)} €.\nMerci de vérifier avant envoi.`;
     }
 
     const commentaireField = document.getElementById("commentaire");
