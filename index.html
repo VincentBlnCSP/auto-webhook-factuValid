@@ -2,158 +2,52 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Échéancier Facturation</title>
-  <link rel="icon" type="image/png" href="logo-csp.png">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      padding: 20px;
-      color: #333;
-    }
-    .container {
-      background-color: #fff;
-      max-width: 900px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    img.logo {
-      width: 160px;
-      display: block;
-      margin: auto;
-      margin-bottom: 20px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 26px;
-      color: #00aa8d;
-    }
-    .subtext {
-      text-align: center;
-      font-size: 14px;
-      color: #777;
-      margin-bottom: 30px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 25px;
-    }
-    th, td {
-      padding: 12px;
-      border: 1px solid #ddd;
-      text-align: center;
-    }
-    th {
-      background-color: #00aa8d;
-      color: white;
-    }
-    input[type="text"], input[type="date"], input[type="number"] {
-      width: 90%;
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    button {
-      background-color: #00aa8d;
-      color: black;
-      border: 2px solid #00aa8d;
-      padding: 10px 20px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 15px;
-      display: block;
-      margin: 30px auto 0 auto;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .separator {
-      border-top: 1px solid #ccc;
-      margin: 30px 0;
-    }
-  </style>
+  <title>Validation Facturation</title>
 </head>
-<body>
-  <div class="container">
-    <img src="logo-csp.png" class="logo" alt="Logo CSP">
-    <h1>🚀 Envoyer en facturation</h1>
-    <div class="subtext">Toutes les informations de facturation sont modifiables ci-dessous.</div>
+<body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 30px;">
 
-    <table id="echeancier-table">
-      <thead>
-        <tr>
-          <th>🔐 Description</th>
-          <th>📅 Date</th>
-          <th>💶 Montant</th>
-          <th>❌</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Lignes dynamiques JS -->
-      </tbody>
-    </table>
-    <button onclick="addRow()">➕ Ajouter une échéance</button>
+  <div style="text-align: center;">
+    <p style="font-size: 18px; font-weight: bold;">🚀 Envoyer en facturation</p>
 
-    <div class="separator"></div>
+    <a href="#" 
+       id="factuBtn"
+       target="_blank"
+       style="display: inline-block; padding: 12px 30px; background-color: #00aa8d; color: black; border: 2px solid black; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none;">
+       Cliquer ici pour accéder au formulaire
+    </a>
 
-    <div style="text-align:center; font-size: 13px; color: #666;">
-      Une fois validé, les informations seront transmises à notre système de facturation.
-    </div>
-    <button id="valider-btn" disabled>🚀 Valider et envoyer</button>
+    <div id="dealInfo" style="font-size: 12px; color: #555; margin-top: 10px;"></div>
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const dealId = urlParams.get("deal_id");
+    const params = new URLSearchParams(window.location.search);
+    const dealId = params.get("deal_id");
+    const infoZone = document.getElementById("dealInfo");
 
-    const tableBody = document.querySelector("#echeancier-table tbody");
-    const validerBtn = document.getElementById("valider-btn");
+    if (dealId) {
+      fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deal_id: dealId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const nomAffaire = data.deal_name;
+        const montant = data.montantLDM;
 
-    fetch(`https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh?deal_id=${dealId}`)
-      .then(response => response.json())
-      .then(res => {
-        const echeances = JSON.parse(res.echeances).data;
-        echeances.forEach(addRowFromData);
-        checkIfValid();
+        // Afficher le récap
+        infoZone.innerHTML = `📄 <strong>${nomAffaire}</strong><br>💶 Montant total LDM : <strong>${montant} €</strong>`;
+
+        // Changer lien bouton vers la version complète
+        document.getElementById("factuBtn").href = `https://vincentblncsp.github.io/auto-webhook-factuValid/?deal_id=${dealId}`;
+      })
+      .catch(err => {
+        infoZone.innerHTML = "❌ Impossible de récupérer les informations. Veuillez réessayer.";
       });
-
-    function addRowFromData(e) {
-      const row = tableBody.insertRow();
-      row.innerHTML = `
-        <td><input type="text" value="${e.description || ''}" onchange="checkIfValid()"></td>
-        <td><input type="date" value="${e.billing_date || ''}" onchange="checkIfValid()"></td>
-        <td><input type="number" value="${e.amount || ''}" onchange="checkIfValid()"></td>
-        <td><button onclick="this.parentElement.parentElement.remove(); checkIfValid()">❌</button></td>
-      `;
-    }
-
-    function addRow() {
-      const row = tableBody.insertRow();
-      row.innerHTML = `
-        <td><input type="text" placeholder="Ex: Acompte 1" onchange="checkIfValid()"></td>
-        <td><input type="date" onchange="checkIfValid()"></td>
-        <td><input type="number" onchange="checkIfValid()"></td>
-        <td><button onclick="this.parentElement.parentElement.remove(); checkIfValid()">❌</button></td>
-      `;
-    }
-
-    function checkIfValid() {
-      const rows = document.querySelectorAll("#echeancier-table tbody tr");
-      let hasValid = false;
-      rows.forEach(row => {
-        const inputs = row.querySelectorAll("input");
-        if (inputs[0].value && inputs[1].value && inputs[2].value) {
-          hasValid = true;
-        }
-      });
-      validerBtn.disabled = !hasValid;
+    } else {
+      infoZone.innerHTML = "❌ Aucun ID d'affaire fourni dans l'URL.";
     }
   </script>
+
 </body>
 </html>
