@@ -2,75 +2,31 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Validation Facturation</title>
+  <title>Données Facturation</title>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f8f8f8; padding: 30px;">
+<body>
 
-  <div style="text-align: center;">
-    <p style="font-size: 18px; font-weight: bold;">🚀 Envoyer en facturation</p>
-
-    <a href="#" 
-       id="factuBtn"
-       target="_blank"
-       style="display: inline-block; padding: 12px 30px; background-color: #00aa8d; color: black; border: 2px solid black; border-radius: 6px; font-size: 16px; font-weight: bold; text-decoration: none;">
-       Cliquer ici pour accéder au formulaire
-    </a>
-
-    <div id="dealInfo" style="font-size: 12px; color: #555; margin-top: 10px;"></div>
-    <div id="echeancier" style="margin-top: 20px; font-size: 14px;"></div>
-  </div>
+  <pre id="output">Chargement...</pre>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const dealId = params.get("deal_id");
-    const infoZone = document.getElementById("dealInfo");
-    const echeancierZone = document.getElementById("echeancier");
+    const dealId = new URLSearchParams(window.location.search).get("deal_id");
+    const output = document.getElementById("output");
 
-    if (dealId) {
-      // On affiche un petit message de chargement
-      infoZone.innerHTML = "⏳ Chargement des informations...";
-
+    if (!dealId) {
+      output.textContent = "❌ Aucun ID d'affaire fourni dans l'URL.";
+    } else {
       fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deal_id: dealId })
       })
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data => {
-        const nomAffaire = data.deal_name;
-        const montant = data.montantLDM;
-        const echeances = JSON.parse(data.echeances).data;
-
-        // Afficher le récap
-        infoZone.innerHTML = `📄 <strong>${nomAffaire}</strong><br>💶 Montant total LDM : <strong>${montant} €</strong>`;
-
-        // Construire le tableau d'échéancier
-        if (echeances.length > 0) {
-          let table = '<table style="margin: 0 auto; border-collapse: collapse; font-size: 13px;">';
-          table += '<tr><th style="border: 1px solid #ccc; padding: 5px 10px;">Date</th><th style="border: 1px solid #ccc; padding: 5px 10px;">Montant (€)</th><th style="border: 1px solid #ccc; padding: 5px 10px;">Description</th></tr>';
-
-          echeances.forEach(e => {
-            table += `<tr>
-                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.billing_date}</td>
-                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.amount}</td>
-                        <td style="border: 1px solid #ccc; padding: 5px 10px;">${e.description}</td>
-                      </tr>`;
-          });
-          table += '</table>';
-          echeancierZone.innerHTML = `📆 <strong>Échéancier :</strong><br>${table}`;
-        } else {
-          echeancierZone.innerHTML = "⚠️ Aucun échéancier renseigné.";
-        }
-
-        // Changer lien bouton vers la version complète
-        document.getElementById("factuBtn").href = `https://vincentblncsp.github.io/auto-webhook-factuValid/?deal_id=${dealId}`;
+        output.textContent = JSON.stringify(data, null, 2); // Affiche tout proprement
       })
-      .catch(err => {
-        console.error("Erreur :", err);
-        infoZone.innerHTML = "❌ Impossible de récupérer les informations. Veuillez réessayer.";
+      .catch(error => {
+        output.textContent = "❌ Erreur lors de la récupération : " + error;
       });
-    } else {
-      infoZone.innerHTML = "❌ Aucun ID d'affaire fourni dans l'URL.";
     }
   </script>
 
