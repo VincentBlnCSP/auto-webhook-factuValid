@@ -2,33 +2,99 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Données Facturation</title>
+  <title>Échéancier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      padding: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .warning {
+      color: #d9534f;
+      font-weight: bold;
+      margin-top: 20px;
+      text-align: right;
+    }
+    .center {
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-
-  <pre id="output">Chargement...</pre>
+  <div class="center">
+    <h2>📋 Tableau des échéances</h2>
+    <div id="dealInfo"></div>
+    <table id="echeancierTable" style="display:none">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Description</th>
+          <th>Date de facturation</th>
+          <th>Montant (€)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="warning" id="cumul"></div>
+  </div>
 
   <script>
-    const dealId = new URLSearchParams(window.location.search).get("deal_id");
-    const output = document.getElementById("output");
+    const params = new URLSearchParams(window.location.search);
+    const dealId = params.get("deal_id");
 
-    if (!dealId) {
-      output.textContent = "❌ Aucun ID d'affaire fourni dans l'URL.";
-    } else {
+    if (dealId) {
       fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deal_id: dealId })
       })
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
-        output.textContent = JSON.stringify(data, null, 2); // Affiche tout proprement
+        const dealName = data.deal_name;
+        const montantLDM = parseFloat(data.montantLDM);
+        const echeances = data.echeances.data;
+
+        document.getElementById("dealInfo").innerHTML = `🧾 <strong>${dealName}</strong><br>💶 Montant total LDM : <strong>${montantLDM.toLocaleString("fr-FR", {minimumFractionDigits: 2})} €</strong>`;
+
+        const tableBody = document.querySelector("#echeancierTable tbody");
+        let total = 0;
+
+        echeances.forEach((e, index) => {
+          total += parseFloat(e.amount);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${e.description}</td>
+            <td>${new Date(e.billing_date).toLocaleDateString("fr-FR")}</td>
+            <td>${parseFloat(e.amount).toLocaleString("fr-FR", {minimumFractionDigits: 2})}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+
+        document.getElementById("echeancierTable").style.display = "table";
+
+        const warning = total !== montantLDM ? "⚠️" : "✅";
+        document.getElementById("cumul").innerHTML = `Cumul des versements échelonnés : <strong>${total.toLocaleString("fr-FR", {minimumFractionDigits: 2})} €</strong> ${warning}`;
       })
       .catch(error => {
-        output.textContent = "❌ Erreur lors de la récupération : " + error;
+        document.body.innerHTML = `<p style='color:red;'>❌ Erreur lors de la récupération : ${error}</p>`;
       });
+    } else {
+      document.body.innerHTML = "<p style='color:red;'>❌ Aucun ID d'affaire fourni dans l'URL.</p>";
     }
   </script>
-
 </body>
 </html>
