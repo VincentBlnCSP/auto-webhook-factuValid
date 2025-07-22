@@ -2,168 +2,157 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Validation de l'envoi en facturation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Échéancier Facturation</title>
+  <link rel="icon" type="image/png" href="logo-csp.png">
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #d0f5ef;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
       color: #333;
-      margin: 0;
-      padding: 0;
     }
     .container {
-      max-width: 600px;
-      margin: 40px auto;
-      background: white;
+      background-color: #fff;
+      max-width: 900px;
+      margin: auto;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border: 2px solid #00aa8d;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-    .logo {
+    img.logo {
+      width: 160px;
       display: block;
-      margin: 0 auto 10px auto;
-      height: 50px;
+      margin: auto;
+      margin-bottom: 20px;
     }
     h1 {
-      color: #00aa8d;
       text-align: center;
+      font-size: 26px;
+      color: #00aa8d;
+    }
+    .subtext {
+      text-align: center;
+      font-size: 14px;
+      color: #777;
       margin-bottom: 30px;
     }
-    .field {
-      margin-bottom: 15px;
-    }
-    .field label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 5px;
-    }
-    .info {
-      background: #e0f7f4;
-      padding: 15px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      border: 1px solid #00aa8d;
-    }
-    textarea {
+    table {
       width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      resize: vertical;
+      border-collapse: collapse;
+      margin-bottom: 25px;
     }
-    .buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 25px;
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
     }
-    .btn {
-      padding: 10px 25px;
-      border: none;
-      border-radius: 6px;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .btn-valider {
+    th {
       background-color: #00aa8d;
       color: white;
     }
-    .btn-valider:disabled {
-      background-color: #cccccc;
+    input[type="text"], input[type="date"], input[type="number"] {
+      width: 90%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #00aa8d;
+      color: black;
+      border: 2px solid #00aa8d;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 15px;
+      display: block;
+      margin: 30px auto 0 auto;
+    }
+    button:disabled {
+      opacity: 0.6;
       cursor: not-allowed;
     }
-    .btn-retour {
-      background-color: #f28b82;
-      color: black;
-    }
-    .alert {
-      margin-top: 20px;
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      padding: 10px;
-      border-radius: 6px;
+    .separator {
+      border-top: 1px solid #ccc;
+      margin: 30px 0;
     }
   </style>
 </head>
 <body>
- <div class="container">
-  <div style="text-align: center; margin-bottom: 20px;">
-    <img src="logo-csp.png" alt="Logo CSP" style="height: 60px;" />
-  </div>
-    <h1>🚀 Validation de l’envoi en facturation</h1>
+  <div class="container">
+    <img src="logo-csp.png" class="logo" alt="Logo CSP">
+    <h1>🚀 Envoyer en facturation</h1>
+    <div class="subtext">Toutes les informations de facturation sont modifiables ci-dessous.</div>
 
-    <div class="info">
-      <p><strong>Affaire :</strong> <span id="name_id"></span></p>
-      <p><strong>Montant total :</strong> <span id="montantLDM"></span> €</p>
-      <p><strong>Nombre d’échéances :</strong> <span id="NbEcheance"></span></p>
-      <p><strong>Total des paiements saisis :</strong> <span id="TotalPaiement"></span> €</p>
-      <div id="alertEcart" class="alert" style="display: none;"></div>
-      <p><strong>Date de la 1ère échéance :</strong> <span id="Date1erEcheance"></span></p>
-    </div>
+    <table id="echeancier-table">
+      <thead>
+        <tr>
+          <th>🔐 Description</th>
+          <th>📅 Date</th>
+          <th>💶 Montant</th>
+          <th>❌</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Lignes dynamiques JS -->
+      </tbody>
+    </table>
+    <button onclick="addRow()">➕ Ajouter une échéance</button>
 
-    <div class="field">
-      <label for="commentaire">💬 Commentaire obligatoire à destination de la facturation :</label>
-      <textarea id="commentaire" rows="4" placeholder="Ex : faire attention à bien prélever après le 20 du mois..."></textarea>
-    </div>
+    <div class="separator"></div>
 
-    <div class="buttons">
-      <button class="btn btn-valider" id="btnValider" onclick="valider()" disabled>✅ Valider</button>
-      <button class="btn btn-retour" onclick="window.history.back()">↩️ Retour</button>
+    <div style="text-align:center; font-size: 13px; color: #666;">
+      Une fois validé, les informations seront transmises à notre système de facturation.
     </div>
+    <button id="valider-btn" disabled>🚀 Valider et envoyer</button>
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const name_id = params.get("name_id") || "?";
-    const montantLDM = parseFloat(params.get("montantLDM")) || 0;
-    const NbEcheance = params.get("NbEchéance") || "-";
-    const Date1erEcheance = params.get("Date1erEcheance") || "-";
-    const TotalPaiement = parseFloat(params.get("TotalPaiement")) || 0;
+    const urlParams = new URLSearchParams(window.location.search);
+    const dealId = urlParams.get("deal_id");
 
-    document.getElementById("name_id").innerText = decodeURIComponent(name_id);
-    document.getElementById("montantLDM").innerText = montantLDM.toLocaleString();
-    document.getElementById("NbEcheance").innerText = NbEcheance;
-    document.getElementById("Date1erEcheance").innerText = Date1erEcheance;
-    document.getElementById("TotalPaiement").innerText = TotalPaiement.toLocaleString();
+    const tableBody = document.querySelector("#echeancier-table tbody");
+    const validerBtn = document.getElementById("valider-btn");
 
-    const ecart = Math.abs(montantLDM - TotalPaiement);
-    if (ecart > 1) {
-      document.getElementById("alertEcart").style.display = "block";
-      document.getElementById("alertEcart").innerText = `⚠️ Écart détecté entre le montant de l'affaire et les paiements saisis : \n ${ecart.toFixed(2)} €.\nMerci de vérifier avant envoi.`;
+    fetch(`https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh?deal_id=${dealId}`)
+      .then(response => response.json())
+      .then(res => {
+        const echeances = JSON.parse(res.echeances).data;
+        echeances.forEach(addRowFromData);
+        checkIfValid();
+      });
+
+    function addRowFromData(e) {
+      const row = tableBody.insertRow();
+      row.innerHTML = `
+        <td><input type="text" value="${e.description || ''}" onchange="checkIfValid()"></td>
+        <td><input type="date" value="${e.billing_date || ''}" onchange="checkIfValid()"></td>
+        <td><input type="number" value="${e.amount || ''}" onchange="checkIfValid()"></td>
+        <td><button onclick="this.parentElement.parentElement.remove(); checkIfValid()">❌</button></td>
+      `;
     }
 
-    const commentaireField = document.getElementById("commentaire");
-    const btnValider = document.getElementById("btnValider");
+    function addRow() {
+      const row = tableBody.insertRow();
+      row.innerHTML = `
+        <td><input type="text" placeholder="Ex: Acompte 1" onchange="checkIfValid()"></td>
+        <td><input type="date" onchange="checkIfValid()"></td>
+        <td><input type="number" onchange="checkIfValid()"></td>
+        <td><button onclick="this.parentElement.parentElement.remove(); checkIfValid()">❌</button></td>
+      `;
+    }
 
-    commentaireField.addEventListener("input", () => {
-      btnValider.disabled = commentaireField.value.trim() === "";
-    });
-
-    async function valider() {
-      const commentaire = commentaireField.value;
-      const body = {
-        name_id,
-        montantLDM,
-        NbEcheance,
-        Date1erEcheance,
-        TotalPaiement,
-        commentaire
-      };
-
-      try {
-        await fetch("https://hook.eu2.make.com/4n43s44ulig2di1my33gqmelal2itulh", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body)
-        });
-
-        alert("✅ La demande a bien été envoyée à la facturation.");
-        window.location.href = "about:blank";
-      } catch (e) {
-        alert("❌ Une erreur est survenue lors de l'envoi.");
-      }
+    function checkIfValid() {
+      const rows = document.querySelectorAll("#echeancier-table tbody tr");
+      let hasValid = false;
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll("input");
+        if (inputs[0].value && inputs[1].value && inputs[2].value) {
+          hasValid = true;
+        }
+      });
+      validerBtn.disabled = !hasValid;
     }
   </script>
 </body>
